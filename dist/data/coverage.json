@@ -1,0 +1,52 @@
+{
+  "source": "https://github.com/Vonter/bbmp-trade-license/releases/download/bbmp-trade-license/trade-license.csv.gz",
+  "source_release": "2026-09-01",
+  "source_sha256": "0980a6cff9c7ba361c83172f9c5f32bda7245878456a8f0a62cfb6f9d2bd89cc",
+  "attribution": "BBMP Trade License Website; BBMP trade-licence applications dataset compiled by Vivek Matthew (Vonter), adapted by Team Codyssey.",
+  "license": "ODbL 1.0",
+  "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "period": [
+    2020,
+    2024
+  ],
+  "start_date": "2020-01-01",
+  "end_date": "2024-12-31",
+  "distinct_application_ids": 345123,
+  "distinct_wards": 198,
+  "distinct_quarters": 20,
+  "aggregated_rows": 19502,
+  "source_rows": 952985,
+  "missing_date_in_full_source": 0,
+  "period_rows_before_deduplication": 358635,
+  "additional_trade_rows_for_repeat_ids": 13512,
+  "application_types": {
+    "New": 60856,
+    "Renewal": 284267
+  },
+  "calendar_year_totals": {
+    "2020": 77450,
+    "2021": 60619,
+    "2022": 65028,
+    "2023": 72053,
+    "2024": 69973
+  },
+  "unclassified_by_year": {
+    "2020": 13817,
+    "2021": 9594,
+    "2022": 7996,
+    "2023": 8271,
+    "2024": 6795
+  },
+  "categories": [
+    "Food & drink",
+    "Accommodation",
+    "Medical & personal care",
+    "Industrial trades",
+    "Construction materials",
+    "Retail & other trades",
+    "Power machinery",
+    "Entertainment & fuel",
+    "Multiple categories",
+    "Unclassified"
+  ]
+}

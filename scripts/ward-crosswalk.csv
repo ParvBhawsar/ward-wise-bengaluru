@@ -1,0 +1,199 @@
+source_ward,ward_id,boundary_name,match
+Kempegowda Ward,1,Kempegowda Ward,normalized exact
+Chowdeshwari Ward,2,Chowdeswari Ward,reviewed name alias
+Attur,3,Atturu,reviewed name alias
+Yelahanka Satellite town,4,Yelahanka Satellite Town,normalized exact
+Jakkur,5,Jakkuru,reviewed name alias
+Thanisandra,6,Thanisandra,normalized exact
+Byatarayanapura,7,Byatarayanapura,normalized exact
+Kodigehalli,8,Kodigehalli,normalized exact
+Vidyaranyapura,9,Vidyaranyapura,normalized exact
+Doddabommasandra,10,Dodda Bommasandra,normalized exact
+Kuvempunagar,11,Kuvempu Nagar,normalized exact
+Shettyhalli,12,Shettihalli,reviewed name alias
+Mallasandra,13,Mallasandra,normalized exact
+Bagalagunte,14,Bagalakunte,reviewed name alias
+T. Dasarahalli,15,T Dasarahalli,normalized exact
+Jalahalli,16,Jalahalli,normalized exact
+J.P.Park,17,J P Park,normalized exact
+Radhakrishna Temple Ward,18,Radhakrishna Temple Ward,normalized exact
+Sanjaynagar,19,Sanjaya Nagar,reviewed name alias
+Ganganagar,20,Ganga Nagar,normalized exact
+Hebbal,21,Hebbala,reviewed name alias
+VishwanathNagenahalli,22,Vishwanath Nagenahalli,normalized exact
+Nagavara,23,Nagavara,normalized exact
+HBR Layout,24,HBR Layout,normalized exact
+Horamavu,25,Horamavu,normalized exact
+Ramamurthynagar,26,Ramamurthy Nagar,normalized exact
+Banasawadi,27,Banasavadi,reviewed name alias
+Kammanahalli,28,Kammanahalli,normalized exact
+Kacharakanahalli,29,Kacharkanahalli,reviewed name alias
+Kadugondanahalli,30,Kadugondanahalli,normalized exact
+Kushalnagar,31,Kushal Nagar,normalized exact
+Kavalbyrasandra,32,Kaval Bairasandra,reviewed name alias
+Manorayanapalya,33,Manorayanapalya,normalized exact
+Gangenahalli,34,Gangenahalli,normalized exact
+Aramane Nagar,35,Aramane Nagara,reviewed name alias
+Mathikere,36,Mattikere,reviewed name alias
+Yeshwanthpur,37,Yeshwanthpura,reviewed name alias
+H.M.T,38,HMT Ward,reviewed name alias
+Chokkasandra,39,Chokkasandra,normalized exact
+Doddabidarakallu,40,Dodda Bidarakallu,normalized exact
+Peenya Industrial Area,41,Peenya Industrial Area,normalized exact
+Lakshmidevinagar,42,Lakshmi Devi Nagar,normalized exact
+Nandini Layout,43,Nandini Layout,normalized exact
+Marappanahalli,44,Marappana Palya,reviewed name alias
+Malleshwaram,45,Malleswaram,reviewed name alias
+Jayachamarajendra Nagar,46,Jayachamarajendra Nagar,normalized exact
+Devarajeevanahalli,47,Devara Jeevanahalli,normalized exact
+Muneshwaranagar,48,Muneshwara Nagar,normalized exact
+Lingarajapura,49,Lingarajapura,normalized exact
+Benniganahalli,50,Benniganahalli,normalized exact
+Vijinapura,51,Vijnanapura,reviewed name alias
+K.R.Puram,52,K R Puram,normalized exact
+Basavanapura,53,Basavanapura,normalized exact
+Hoodi,54,Hudi,reviewed name alias
+Devasandra,55,Devasandra,normalized exact
+A. Narayanapura,56,A Narayanapura,normalized exact
+C.V. Ramannagar,57,C V Raman Nagar,normalized exact
+Hosathippasandra,58,New Tippasandara,reviewed name alias
+Maruthiseva Nagar,59,Maruthi Seva Nagar,normalized exact
+Sagayapuram,60,Sagayarapuram,reviewed name alias
+S.K. Garden,61,S K Garden,normalized exact
+Ramaswamy palya,62,Ramaswamy Palya,normalized exact
+Jayamahal,63,Jayamahal,normalized exact
+Rajamahal,64,Rajamahal Guttahalli,reviewed name alias
+Kadumalleshwara,65,Kadu Malleshwar Ward,reviewed name alias
+Subramanyanagar,66,Subramanya Nagar,normalized exact
+Nagapura,67,Nagapura,normalized exact
+Mahalakshmipuram,68,Mahalakshimpuram,reviewed name alias
+Laggere,69,Laggere,normalized exact
+Rajagopalanagar,70,Rajagopal Nagar,reviewed name alias
+Hegganahalli,71,Hegganahalli,normalized exact
+Herohalli,72,Herohalli,normalized exact
+Kottigepalya,73,Kottegepalya,reviewed name alias
+Shakthiganapathi nagar,74,Shakthi Ganapathi Nagar,normalized exact
+Shankaramata,75,Shankar Matt,reviewed name alias
+Gayathrinagar,76,Gayithri Nagar,reviewed name alias
+Dattathreya Temple,77,Dattatreya Temple,reviewed name alias
+Pulikeshinagar,78,Pulikeshinagar,normalized exact
+Sarvagnanagar,79,Sarvagna Nagar,normalized exact
+Hoysalanagar,80,Hoysala Nagar,normalized exact
+Vignananagar,81,Vijnana Nagar,reviewed name alias
+Garudacharpalya,82,Garudachar Playa,reviewed name alias
+Kadugodi,83,Kadugodi,normalized exact
+Hagadooru,84,Hagadur,reviewed name alias
+Doddanekkundi,85,Dodda Nekkundi,normalized exact
+Marathalli,86,Marathahalli,reviewed name alias
+HAL Airport,87,HAL Airport,normalized exact
+Jeevanbhimanagar,88,Jeevanbhima Nagar,normalized exact
+Jogupalya,89,Jogupalya,normalized exact
+Ulsoor,90,Halsoor,reviewed name alias
+Bharathinagar,91,Bharathi Nagar,normalized exact
+Shivajinagar,92,Shivaji Nagar,normalized exact
+Vasanthnagar,93,Vasanth Nagar,normalized exact
+Gandhinagar,94,Gandhinagar,normalized exact
+Subhashnagar,95,Subhash Nagar,normalized exact
+Okalipuram,96,Okalipuram,normalized exact
+Dayanandanagar,97,Dayananda Nagar,normalized exact
+Prakashnagar,98,Prakash Nagar,normalized exact
+Rajajinagar,99,Rajaji Nagar,normalized exact
+Basaveshwaranagar,100,Basaveshwara Nagar,normalized exact
+Kamakshipalya,101,Kamakshipalya,normalized exact
+Vrushabhavathi Nagar,102,Vrisabhavathi Nagar,reviewed name alias
+Kaveripura,103,Kaveripura,normalized exact
+Govindrajnagara,104,Govindaraja Nagar,reviewed name alias
+Agrahara Dasarahalli,105,Agrahara Dasarahalli,normalized exact
+Dr. Rajkumar Ward,106,Dr. Raj Kumar Ward,normalized exact
+Shivanagar,107,Shivanagara,reviewed name alias
+Srirammandira ward,108,Sriramamandir,reviewed name alias
+Chikpet,109,Chickpete,reviewed name alias
+Sampangiramnagar,110,Sampangiram Nagar,normalized exact
+Shanthala Nagar,111,Shantala Nagar,reviewed name alias
+Dommalur,112,Domlur,reviewed name alias
+Konena Agrahara,113,Konena Agrahara,normalized exact
+Agaram,114,Agaram,normalized exact
+Vannarpet,115,Vannarpet,normalized exact
+Neelasandra,116,Nilasandra,reviewed name alias
+Shanthinagar,117,Shanthi Nagar,normalized exact
+Sudamnagar,118,Sudham Nagara,reviewed name alias
+Dharmarayaswamy Temple Ward,119,Dharmaraya Swamy Temple,reviewed name alias
+Cottonpet,120,Cottonpete,reviewed name alias
+Binnypet,121,Binnipete,reviewed name alias
+Kempapura Agrahara,122,Kempapura Agrahara,normalized exact
+Vijaynagar,123,Vijayanagar,reviewed name alias
+Hosahalli,124,Hosahalli,normalized exact
+Marenahalli,125,Marenahalli,normalized exact
+Maruthi Mandira Ward,126,Maruthi Mandir ward,reviewed name alias
+Moodalapalya,127,Mudalapalya,reviewed name alias
+Nagarabhavi,128,Nagarabhavi,normalized exact
+Jnanabharathi ward,129,Jnana Bharathi ward,normalized exact
+Ullalu,130,Ullalu,normalized exact
+Nayandanahalli,131,Nayandahalli,reviewed name alias
+Attiguppe,132,Attiguppe,normalized exact
+Hampinagar,133,Hampi Nagar,normalized exact
+Bapujinagar,134,Bapuji Nagar,normalized exact
+Padarayanapura,135,Padarayanapura,normalized exact
+Jagareevanram Nagar,136,Jagajivanaramnagar,reviewed name alias
+Rayapuram,137,Rayapuram,normalized exact
+Chalavadipalya,138,Chalavadipalya,normalized exact
+K.R. Market,139,K R Market,normalized exact
+Chamrajpet,140,Chamrajapet,reviewed name alias
+Azadnagar,141,Azad Nagar,normalized exact
+Sunkenahalli,142,Sunkenahalli,normalized exact
+Vishweshrapuram,143,Vishveshwara Puram,reviewed name alias
+Siddapura,144,Siddapura,normalized exact
+Hombegowdanagar,145,Hombegowda Nagara,reviewed name alias
+Lakkasandra,146,Lakkasandra,normalized exact
+Adugodi,147,Adugodi,normalized exact
+Ejipura,148,Ejipura,normalized exact
+Varthur,149,Varthuru,reviewed name alias
+Bellandur,150,Bellanduru,reviewed name alias
+Koramangala,151,Koramangala,normalized exact
+Sudduguntepalya,152,Suddagunte Palya,reviewed name alias
+Jayangar,153,Jayanagar,reviewed name alias
+Basavanagudi,154,Basavanagudi,normalized exact
+Hanumanthanagar,155,Hanumanth Nagar,reviewed name alias
+Srinagar,156,Srinagar,normalized exact
+Gali Anjaneya swamy Temple Ward,157,Gali Anjenaya Temple ward,reviewed name alias
+Deepanjali Nagar,158,Deepanjali Nagar,normalized exact
+Kengeri,159,Kengeri,normalized exact
+Rajarajeshwarinagar,160,Rajarajeshwari Nagar,normalized exact
+Hosakerehalli,161,Hosakerehalli,normalized exact
+Girinagar,162,Girinagar,normalized exact
+Katriguppe,163,Katriguppe,normalized exact
+Vidyapeetha Ward,164,Vidyapeeta ward,reviewed name alias
+Ganeshmandira Ward,165,Ganesh Mandir ward,reviewed name alias
+Karisandra,166,Karisandra,normalized exact
+Yadiyuru,167,Yediyur,reviewed name alias
+Pattabhiramnagar,168,Pattabhiram Nagar,normalized exact
+Byrasandra,169,Byrasandra,normalized exact
+Jayanagar East,170,Jayanagar East,normalized exact
+Gurappanapalya,171,Gurappanapalya,normalized exact
+Madiwala,172,Madivala,reviewed name alias
+Jakkasandra,173,Jakkasandra,normalized exact
+HSR Layout,174,HSR Layout,normalized exact
+Bommanahalli,175,Bommanahalli,normalized exact
+BTM Layout,176,BTM Layout,normalized exact
+J.P.Nagar,177,J P Nagar,normalized exact
+Sarakki,178,Sarakki,normalized exact
+Shakambarinagar,179,Shakambari Nagar,normalized exact
+Banashankari Temple Ward,180,Banashankari Temple ward,normalized exact
+Kumaraswamy Layout,181,Kumaraswamy Layout,normalized exact
+Padmanabhanagar,182,Padmanabha Nagar,normalized exact
+Chikkallasandra,183,Chikkalsandra,reviewed name alias
+Uttarahalli,184,Uttarahalli,normalized exact
+Yelachenahalli,185,Yelchenahalli,reviewed name alias
+Jaraganahalli,186,Jaraganahalli,normalized exact
+Puttenahalli,187,Puttenahalli,normalized exact
+Bilekahalli,188,Bilekhalli,reviewed name alias
+Hongasandra,189,Hongasandra,normalized exact
+Mangammanapalya,190,Mangammanapalya,normalized exact
+Singasandra,191,Singasandra,normalized exact
+Begur,192,Begur,normalized exact
+Arakere,193,Arakere,normalized exact
+Gottigere,194,Gottigere,normalized exact
+Konanakunte,195,Konankunte,reviewed name alias
+Anjanapura,196,Anjanapura,normalized exact
+Vasanthapura,197,Vasanthpura,reviewed name alias
+Hemmigepura,198,Hemmigepura,normalized exact

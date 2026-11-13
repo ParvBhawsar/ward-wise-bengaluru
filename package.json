@@ -1,0 +1,12 @@
+{
+  "name": "ward-wise-bengaluru",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Team Codyssey\u2019s Bengaluru trade-application atlas",
+  "type": "module",
+  "scripts": {
+    "test": "node --check dist/assets/app.js && node --check dist/assets/motion.js && node --check dist/assets/spotlight.js && python3 -m unittest discover -s tests",
+    "build": "python3 scripts/build_analysis.py",
+    "start": "python3 -m http.server 5173 --directory dist"
+  }
+}

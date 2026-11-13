@@ -1,0 +1,11 @@
+name: Verify atlas
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - run: npm test
+      - run: npm run build && git diff --exit-code -- dist/data/atlas.json
