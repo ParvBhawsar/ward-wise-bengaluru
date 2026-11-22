@@ -4,6 +4,17 @@ Team Codyssey built Ward Wise for the BAICONF Datathon Stage 2. The atlas follow
 
 ![The interactive Bengaluru atlas](docs/figures/ward-wise-atlas.jpg)
 
+## Final-round application
+
+[Live atlas](https://ward-wise-bengaluru.vercel.app/) · [Evidence lab, ward 85](https://ward-wise-bengaluru.vercel.app/#lab/85/1/19) · [Two-ward comparison](https://ward-wise-bengaluru.vercel.app/#lab/85/1/19/150) · [15-minute final briefing](https://ward-wise-bengaluru.vercel.app/#brief/1)
+
+- **Atlas.** Search any historical ward, filter the period, trade or filing type, inspect its profile and export counts. A filtered map address reopens the selected view.
+- **Evidence lab.** Inspect any of the 198 wards, eight scored trades and 20 quarters. The lab shows raw local and peer denominators, the published expected count and band when eligible, the preceding quarter’s score and the reason for selection or exclusion. Compare any two wards using the same trade and quarter. Export the evidence as JSON or copy a link. All 5,472 eligible scores come from the Python run. Ineligible combinations still display their recorded counts.
+- **Review radar.** Open a quarter or search all 22 historical cards. Save and revisit an assessment. Export your review log as JSON, or import a colleague’s export after previewing the number of new entries. Import keeps existing assessments and validates the complete file before saving. Historical device-local reviews remain readable. Public evidence links contain only record identifiers. Assessment notes stay in the browser until exported.
+- **Final briefing.** Ten slides with a 15-minute speaking schedule, presenter notes, screenshots and live demo links. Use the previous/next controls, slide picker, or arrow keys with focus outside the controls. The navigation remembers your current slide when you return from the demo. Print/save slides produces all ten slides; printing with browser headers and footers disabled gives the cleanest result.
+
+**Suggested demo.** Start on the map and select Bellanduru in 2024. Open the evidence lab for ward 85 and show 36 accommodation filings against 92.4 expected in Q4. Inspect the source-count table and calculation. Change to Q3 and show why one qualifying quarter did not enter the queue. Return to Q4, assess the case and export the review log. Demonstration notes should be labelled as such.
+
 ## Run locally
 
 The committed `dist/` is a deployable offline-capable static asset directory. The app makes no third-party runtime requests and needs no API keys. Start a local HTTP server from the repository root with Python 3.
@@ -47,6 +58,7 @@ The extraction script checks the compressed input SHA-256 before processing. Use
 | `dist/data/application-counts.csv` | Shareable counts grouped by ward, quarter, category and application type |
 | `dist/data/coverage.json` | Provenance, dates, denominators and completeness |
 | `dist/data/atlas.json` | Browser representation, review queue and validation output |
+| `dist/data/audit.json` | Eligible model scores and final selection decisions for the evidence lab |
 | `dist/data/wards.json`, `lakes.json` | Projected boundary paths and lake outlines |
 | `scripts/` | Reproducible data acquisition, ward crosswalk, geography and analysis |
 | `tests/`, `.github/workflows/` | Integrity checks and deterministic rebuild verification |

@@ -93,6 +93,27 @@ def run():
         candidates=[r for r in by_t[t] if (t,r['cat'],1 if r['z']>0 else -1) not in systemic]
         picked = sorted(candidates,key=lambda r:(-abs(r['z']),r['ward'],r['cat']))[:BUDGET]
         queues.append([public(r) for r in picked])
+    # Publish the exact decisions of this run so the browser can also explain
+    # eligible pairs which never reached a quarterly shortlist.
+    selected_keys = {(r['ward'], r['cat'], r['t']) for queue in queues for r in queue}
+    persistent_keys = {(r['ward'], r['cat'], t) for t, group in by_t.items() for r in group}
+    audit_rows = []
+    for key, record in sorted(history.items()):
+        w, c, t = key
+        if key in selected_keys:
+            decision = 'selected'
+        elif key in persistent_keys:
+            direction = 1 if record['z'] > 0 else -1
+            decision = 'shared' if (t, c, direction) in systemic else 'budget'
+        else:
+            decision = 'unconfirmed'
+        audit_rows.append([w, c, t, record['expected'], record['low'], record['high'],
+                           record['z'], decision])
+    audit = dict(version=1, columns=['ward', 'cat', 't', 'expected', 'low', 'high', 'z', 'decision'],
+                 parameters=dict(volume=MIN_VOLUME, expected=MIN_EXPECTED, threshold=Z_LIMIT,
+                                 borrowed=PSEUDOCOUNT, budget=BUDGET), scores=audit_rows)
+    (DATA/'audit.json').write_text(json.dumps(audit, separators=(',', ':'))+'\n')
+
     # Conditional detector sensitivity, independently simulated on eligible 2024 pairs.
     # This tests the evidence rule before queue truncation, not field validity.
     pairs=[(history[w,c,t-1],r) for (w,c,t),r in history.items() if t>=16 and (w,c,t-1) in history]

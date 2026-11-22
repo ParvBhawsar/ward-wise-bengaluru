@@ -1,3 +1,7 @@
+import {researchIndex} from './research.js';
+import {renderLab} from './lab.js';
+import {briefing} from './briefing.js';
+import {statuses, legacyKey, prefix, readEntry, revise, parseTransfer} from './review-store.js';
 import {observeSections, playMotion} from './motion.js';
 import {mountSpotlight} from './spotlight.js';
 const main = document.querySelector('#content');
@@ -25,7 +29,31 @@ let a,geo,lakes,coverage,wards,wardById,rows;
 const state={year:'all',cat:'all',type:'all',ward:151,t:19,zoom:1,relief:false};
 let activeChart;
 let timelineTimer = null;
-const view = () => ['radar','methods'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'atlas';
+const parts = () => location.hash.slice(1).split('/');
+const view = () => ['radar','methods','lab','brief'].includes(parts()[0]) ? parts()[0] : 'atlas';
+let auditRequest;
+let visit = 0;
+let lastFrame = 1;
+function auditData(){
+  if (!auditRequest) auditRequest=fetch('data/audit.json').then(r=>{
+    if(!r.ok)throw Error('audit');
+    return r.json();
+  }).then(data=>researchIndex(a,data)).catch(error=>{auditRequest=null;throw error});
+  return auditRequest;
+}
+function openReview(w,c,t){
+  const dest='radar/'+t+'/'+w+'/'+c;
+  if(location.hash==='#'+dest)route();else location.hash=dest;
+}
+function syncAtlas(){
+  if(view()!=='atlas') return;
+  const path=['atlas',state.ward,state.year,state.cat,state.type,state.relief?'relief':'flat'];
+  history.replaceState(null,'','#'+path.join('/'));
+}
+function syncRadar(){
+  history.replaceState(null,'','#radar/'+state.t);
+}
+
 function message(txt){const n=document.querySelector('#notify');n.textContent=txt;setTimeout(()=>{if(n.textContent===txt)n.textContent=''},3800)}
 function qname(t){return 'Q'+(t%4+1)+' '+(2020+Math.floor(t/4))}
 function openSheet(html){
@@ -73,7 +101,7 @@ function inspector(s){
  return '<div class="over orange">Selected ward · '+String(w.id).padStart(3,'0')+'</div><div class="inspect-title"><div><h2>'+esc(w.name)+'</h2><p class="small">'+esc(w.constituency)+' constituency</p></div><span class="pin-box">'+ic('pin')+'</span></div><div class="inspect-stat"><strong>'+fmt(ws.total)+'</strong><span>applications · '+periodLabel()+'</span></div><div class="proportions">'+[ws.fresh,ws.renew].map((n,i)=>'<span style="width:'+pct(n,ws.total)+';background:'+typeColors[i]+'"></span>').join('')+'</div><div class="key">'+[ws.fresh,ws.renew].map((n,i)=>'<span><i style="background:'+typeColors[i]+'"></i>'+labels[i]+' '+fmt(n)+'</span>').join('')+'</div>'+leader+'<div class="inspect-foot"><span class="small">'+pct(ws.total,s.total)+' of selection</span><button id="profile" class="textbtn">Ward profile '+ic('arrow')+'</button></div>'
 }
 function selectWard(id){
- state.ward=id;const old=main.querySelector('.ward.sel');if(old)old.classList.remove('sel');
+ state.ward=id;syncAtlas();const old=main.querySelector('.ward.sel');if(old)old.classList.remove('sel');
  const path=main.querySelector('[data-ward="'+id+'"]');if(path)path.classList.add('sel');
  main.querySelector('#inspect').innerHTML=inspector(activeChart);main.querySelector('#profile').onclick=wardProfile;
  positionBeacon();
@@ -82,7 +110,7 @@ function selectWard(id){
 }
 function wardProfile(){
  const w=wardById.get(state.ward), all=summarize(filterRows({ward:w.id,year:'all'})), ws=summarize(filterRows({ward:w.id}));
- openSheet('<div class="over orange">Ward '+w.id+' · '+periodLabel()+'</div><h2>'+esc(w.name)+'</h2><p class="small">'+esc(w.constituency)+' constituency · 2012 BBMP boundaries</p><div class="evi-nums"><div><span class="over">Applications</span><strong>'+fmt(ws.total)+'</strong></div><div><span class="over">New</span><strong>'+fmt(ws.fresh)+'</strong></div><div><span class="over">Renewal</span><strong>'+fmt(ws.renew)+'</strong></div></div><div class="over">Five-year application history · current trade and type</div>'+chartSVG(all.byYear,years)+'<div class="over">Recorded trade mix · '+periodLabel()+'</div>'+bars(ws,10));
+ openSheet('<div class="over orange">Ward '+w.id+' · '+periodLabel()+'</div><h2>'+esc(w.name)+'</h2><p class="small">'+esc(w.constituency)+' constituency · 2012 BBMP boundaries</p><div class="evi-nums"><div><span class="over">Applications</span><strong>'+fmt(ws.total)+'</strong></div><div><span class="over">New</span><strong>'+fmt(ws.fresh)+'</strong></div><div><span class="over">Renewal</span><strong>'+fmt(ws.renew)+'</strong></div></div><div class="over">Five-year application history · current trade and type</div>'+chartSVG(all.byYear,years)+'<div class="over">Recorded trade mix · '+periodLabel()+'</div>'+bars(ws,10)+'<div class="tools"><a class="btn" href="#lab/'+w.id+'/'+(Number(state.cat)>=0&&Number(state.cat)<8?Number(state.cat):1)+'/'+(state.year==='all'?19:4*(Number(state.year)-2020)+3)+'">Inspect quarterly evidence →</a></div>');
 }
 function searchWards(){
  openSheet('<h2>Find a ward</h2><label for="query">Ward name, number or constituency</label><input id="query" autocomplete="off" placeholder="Try Koramangala or 151"><div class="results"></div>');
@@ -138,7 +166,7 @@ function updateMapColors(s){
  positionBeacon();
 }
 function toggleRelief(){
- state.relief=!state.relief;
+ state.relief=!state.relief;syncAtlas();
  const card=main.querySelector('.map-card');
  card.classList.toggle('relief-on',state.relief);
  main.querySelector('#relief').setAttribute('aria-pressed',String(state.relief));
@@ -211,6 +239,7 @@ function metricDetail(s){
  return '<span><b>'+fmt(s.byWard.filter(Boolean).length)+'</b> wards with filings</span><span><b>'+fmt(s.fresh)+'</b> new</span><span><b>'+fmt(s.renew)+'</b> renewal</span>';
 }
 function refreshAtlas(){
+ syncAtlas();
  const s=summarize(filterRows());activeChart=s;
  updateMapColors(s);
  const tip=main.querySelector('#tip');tip.hidden=true;
@@ -234,6 +263,7 @@ function atlas(){
  '<div class="main-grid"><section class="map-card'+(state.relief?' relief-on':'')+'" aria-label="Ward map" tabindex="-1"><div id="stage" class="map-stage"></div><div class="map-scan" aria-hidden="true"></div><div class="map-head"><div class="mapcat">BBMP ward map</div><h2>Bengaluru</h2><p>12.97° N &nbsp; 77.59° E</p><div class="map-period">'+periodLabel()+'</div></div><button class="map-search" id="find" aria-label="Find a ward">'+ic('search')+'<span>Find a ward</span></button><button id="relief" class="relief-button" type="button" aria-pressed="'+state.relief+'" title="Raise wards by application volume"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 10-5 10 5-10 5zM3 13l9 4.5 9-4.5M3 17l9 4.5 9-4.5"/></svg> Relief view</button><div id="tip" class="map-tip" hidden></div><div id="scale" class="map-scale"><div class="map-note">'+(state.relief?'Height + colour · volume':'Application volume')+'</div><div class="scale-ramp">'+legendColors()+'</div>Lower &nbsp; → &nbsp; Higher</div><button class="timeline-button" id="timeline-button" aria-pressed="false" aria-label="Play timeline"><span class="transport-icon" aria-hidden="true">▶</span><span class="timeline-caption">Play timeline</span></button><div class="north" aria-label="North is up">N <span>↑</span></div><div class="map-actions"><button id="zin" aria-label="Zoom in">'+ic('plus')+'</button><button id="zout" aria-label="Zoom out">'+ic('minus')+'</button><button id="reset" aria-label="Reset map view">'+ic('reset')+'</button></div></section>'+
  '<aside class="side-stack"><section class="metric"><div class="over">Citywide applications</div><div class="metric-mid"><div class="metric-number">'+fmt(s.total)+'</div>'+spark(all.byYear)+'</div><div class="metric-line">'+metricDetail(s)+'</div></section><section id="inspect" class="inspect">'+inspector(s)+'</section></aside></div>'+
  '<div class="town-credits">Historical ward boundaries · <a href="https://github.com/datameet/Municipal_Spatial_Data/tree/master/Bangalore">DataMeet</a> (2012, CC BY-SA 2.5 IN) · Lakes © ATREE-CSEI via OpenCity · Map shades show relative application volume in the selected view.</div>'+
+ '<section class="case-link"><div><span class="over">Quarterly research case · Ward 85</span><h2>Why did Dodda Nekkundi record 36 accommodation filings?</h2></div><a class="action" href="#lab/85/1/19">Inspect the evidence →</a></section>'+
  '<div class="below"><section class="panel"><div class="panel-header"><div><div class="over orange">Time series</div><h2>Application history</h2></div><span class="badge" id="chart-period">'+(allYears?'ANNUAL':'QUARTERLY')+'</span></div><div id="history-chart">'+periodChart(s)+'</div></section><section class="panel"><div class="panel-header"><div><div class="over orange">Category breakdown</div><h2>Trade composition</h2></div><span class="badge" id="mix-period">'+periodLabel()+'</span></div><div id="mix-bars">'+bars(s)+'</div></section></div><section class="story"></section>';
  paintMap(s);main.querySelector('#find').onclick=searchWards;main.querySelector('#profile').onclick=wardProfile;
  main.querySelectorAll('[data-year]').forEach(b=>b.onclick=()=>{stopTimeline();updateYear(b.dataset.year)});
@@ -247,31 +277,64 @@ function atlas(){
    main.querySelector('#category').value='all';main.querySelector('#type').value='all';
    state.zoom=1.45;selectWard(id);updateYear(year);
  },showEvidence:r=>{
-   if(location.hash==='#radar'){evidence(r);return}
-   state.t=r.t;
-   window.addEventListener('hashchange',()=>evidence(r),{once:true});
-   location.hash='radar';
+   openReview(r.ward,r.cat,r.t);
  }});
 }
-const statuses=['Plausible real change','Likely administrative cause','Need more information','Not relevant'];
-const logKey='wardwise-review-v1';
-let volatileReviews={};
-const caseKey=r=>[r.ward,r.cat,r.t].join('-');
-function reviews(){try{const v=JSON.parse(localStorage.getItem(logKey)||'{}');return v&&typeof v==='object'&&!Array.isArray(v)?{...v,...volatileReviews}:volatileReviews}catch{return volatileReviews}}
-function logItems(){const saved=reviews();return a.queues.flat().filter(r=>statuses.includes(saved[caseKey(r)]?.status)).map(r=>({r,...saved[caseKey(r)]})).sort((x,y)=>String(y.updated).localeCompare(String(x.updated)))}
+const logItems=()=>a.queues.flat().map(r=>({r,...readEntry(r)})).filter(x=>x.status).sort((x,y)=>y.updated.localeCompare(x.updated));
 function evidence(r){
- const w=wardById.get(r.ward),saved=reviews()[caseKey(r)]||{},diff=r.observed-r.expected;
+ const w=wardById.get(r.ward),original=readEntry(r),saved=original||{},diff=r.observed-r.expected;
  openSheet('<div class="over orange">Evidence card · '+qname(r.t)+' · Ward '+r.ward+'</div><h2>'+esc(w.name)+'</h2><p><b>'+esc(a.categories[r.cat])+'</b> applications ran '+(diff>0?'above':'below')+' the expected range for two consecutive quarters.</p>'+
  '<div class="evi-nums"><div><span class="over">Observed</span><strong>'+r.observed+'</strong></div><div><span class="over">Expected</span><strong>'+r.expected+'</strong></div><div><span class="over">Model band</span><strong>'+r.low+'–'+r.high+'</strong></div></div>'+
  '<p>There were '+fmt(r.volume)+' applications across all trades in this ward. This category accounted for <b>'+pct(r.observed,r.volume)+'</b>, compared with '+r.cityShare+'% in the rest of Bengaluru this quarter. Its historical same-quarter share in this ward was '+r.pastShare+'%.</p>'+
  '<div class="memo"><b>What this tells us</b><br>A change in recorded trade mix merits a closer look. Recording practices, backlogs or category changes can affect the numbers. Business closures and their causes cannot be inferred here.</div>'+
  '<p class="small">2012 BBMP ward boundaries · Working model band uses a fixed dispersion assumption. This is an outreach review at ward level.</p>'+
+ '<p><a class="lightlink" href="#lab/'+r.ward+'/'+r.cat+'/'+r.t+'">Inspect source counts and 20-quarter history →</a></p>'+
  '<form id="review-form"><label for="verdict">Officer assessment</label><select required id="verdict"><option value="">Choose an assessment</option>'+statuses.map(v=>opt(v,v,saved.status)).join('')+'</select><label for="memo">Review note <span class="small">(optional)</span></label><textarea id="memo" maxlength="600" placeholder="What would you check next?">'+esc(saved.note||'')+'</textarea><button class="action" type="submit">Save review '+ic('arrow')+'</button></form>');
- sheet.querySelector('form').onsubmit=e=>{e.preventDefault();const status=sheet.querySelector('#verdict').value;if(!statuses.includes(status))return;
- const entry={status,note:sheet.querySelector('#memo').value.slice(0,600),updated:new Date().toISOString()};
- const logs={...reviews(),[caseKey(r)]:entry};let stored=true;
- try{localStorage.setItem(logKey,JSON.stringify(logs))}catch{volatileReviews=logs;stored=false}
- dialog.close();radar();message(stored?'Assessment saved on this device.':'Device storage unavailable. Export this session’s review log.')};
+ let baseline=original;
+ sheet.querySelector('form').onsubmit=async e=>{
+   e.preventDefault();
+   const form=e.currentTarget, submit=form.querySelector('[type=submit]');
+   const status=form.querySelector('#verdict').value;
+   if(!statuses.includes(status))return;
+   submit.disabled=true;
+   try {
+     const entry={status,note:form.querySelector('#memo').value.slice(0,600),updated:new Date().toISOString()};
+     const outcome=await revise(r,entry,baseline);
+     if(outcome==='conflict'){
+       baseline=readEntry(r);
+       let conflict=form.querySelector('[role=alert]');
+       if(!conflict){conflict=document.createElement('p');conflict.setAttribute('role','alert');form.append(conflict);}
+       conflict.textContent='This case changed elsewhere. Current assessment: '+(baseline?.status||'none')+'. '+(baseline?.note||'')+' Save again to replace it with your draft, or close to keep it.';
+       return;
+     }
+     dialog.close();syncRadar();radar();message(outcome==='session'?'Saved for this session. Export your review before leaving.':'Assessment saved on this device.');
+   }catch{message('Could not save this review. Your draft is still open.');}
+   finally{submit.disabled=false;}
+ };
+}
+function importReviewLog(){
+ openSheet('<h2>Import a review log</h2><p>Choose a Ward Wise JSON export. New assessments can be added. Existing local assessments take priority.</p><label for="log-file">Review-log JSON</label><input type="file" id="log-file" accept=".json,application/json"><p id="import-result" role="status"></p><button class="action" id="confirm-import" disabled>Import new assessments</button>');
+ const input=sheet.querySelector('#log-file'), label=sheet.querySelector('#import-result'), apply=sheet.querySelector('#confirm-import');
+ let pending=[];
+ input.onchange=async()=>{
+   const file=input.files[0];pending=[];apply.disabled=true;
+   if(!file)return;
+   try{
+     if(file.size>128000)throw Error('The file is too large for a Ward Wise review log.');
+     const items=parseTransfer(await file.text(),a.queues.flat(),a.categories,qname);
+     if(input.files[0]!==file)return;
+     pending=items.filter(item=>!readEntry(item.r));
+     label.textContent=pending.length+' new · '+(items.length-pending.length)+' already on this device.';
+     apply.disabled=!pending.length;
+   }catch(error){label.textContent=error instanceof SyntaxError?'This file is not valid JSON.':error.message;}
+ };
+ apply.onclick=async()=>{
+   apply.disabled=true;input.disabled=true;let saved=0,temporary=0;
+   try{
+     for(const item of pending){const result=await revise(item.r,item.entry,null);if(result!=='conflict')saved++;if(result==='session')temporary++;}
+     dialog.close();syncRadar();radar();message(saved+' reviews imported.'+(temporary?' Export before closing this session.':''));
+   }catch{label.textContent=saved+' imported before the operation stopped. Re-select the file to resume.';input.disabled=false;}
+ };
 }
 function radar(){
  const queue=[...a.queues[state.t]].sort((x,y)=>wardById.get(x.ward).name.localeCompare(wardById.get(y.ward).name)||a.categories[x.cat].localeCompare(a.categories[y.cat]));
@@ -280,11 +343,20 @@ function radar(){
  '<div class="period-row"><label for="quarter" class="over">Review period</label><span class="select-wrap"><select id="quarter">'+Array.from({length:20},(_,i)=>19-i).map(t=>opt(t,qname(t),state.t)).join('')+'</select></span></div>'+
  '<div class="rad-layout"><section class="panel"><div class="panel-header"><div><div class="over orange">Quarterly shortlist</div><h2>Cases for review</h2></div><span class="badge">'+queue.length+' / 3</span></div>'+
  (queue.length?queue.map((r,i)=>'<article class="signal-card"><div class="over">Ward '+String(r.ward).padStart(3,'0')+' · '+esc(a.categories[r.cat])+'</div><h3>'+esc(wardById.get(r.ward).name)+'</h3><p>'+r.observed+' applications observed. The model expected '+r.expected+' in '+qname(r.t)+'.</p><button data-case="'+i+'" class="textbtn">Open evidence card '+ic('arrow')+'</button></article>').join(''):'<p class="empty">'+(state.t<5?'This period contributes historical observations. More history is needed for a two-quarter comparison.':'No ward–category pair met the evidence and persistence rules this quarter.')+'</p>')+
- '</section><aside class="panel"><div class="over orange">Officer assessments</div><h2>Review log</h2><p class="small">Saved in this browser. Export a copy to share with your team.</p>'+
- (logs.length?logs.map(x=>'<div class="logline"><b>'+esc(wardById.get(x.r.ward).name)+'</b> · '+esc(x.status)+'<small>'+qname(x.r.t)+' · '+esc(a.categories[x.r.cat])+'</small>'+(x.note?'<p>'+esc(x.note)+'</p>':'')+'</div>').join('')+'<button id="export-log" class="btn">'+ic('down')+' Export reviews</button>':'<p class="empty">Open an evidence card and save your assessment to start the log.</p>')+
+ '</section><aside class="panel"><div class="over orange">Officer assessments</div><h2>Review log</h2><button class="textbtn" id="import-log">Import reviews</button><p class="small">Saved in this browser. Export a copy to share with your team.</p>'+
+ (logs.length?logs.map(x=>'<div class="logline"><b>'+esc(wardById.get(x.r.ward).name)+'</b> · '+esc(x.status)+'<small>'+qname(x.r.t)+' · '+esc(a.categories[x.r.cat])+'</small>'+(x.note?'<p>'+esc(x.note)+'</p>':'')+'<a class="textbtn" href="#radar/'+x.r.t+'/'+x.r.ward+'/'+x.r.cat+'">Reopen review →</a></div>').join('')+'<button id="export-log" class="btn">'+ic('down')+' Export reviews</button>':'<p class="empty">Open an evidence card and save your assessment to start the log.</p>')+
  '</aside></div><div class="memo">Up to three eligible cases per quarter, displayed alphabetically. Selection uses the largest absolute standardized deviations after the evidence, persistence and citywide checks. <a href="#methods">See methodology</a>.</div>';
- main.querySelector('#quarter').onchange=e=>{state.t=Number(e.target.value);radar()};
- main.querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>evidence(queue[+b.dataset.case]));
+ main.querySelector('#quarter').onchange=e=>{location.hash='radar/'+e.target.value};
+ main.querySelector('#import-log').onclick=importReviewLog;
+ main.querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>{const r=queue[Number(b.dataset.case)];openReview(r.ward,r.cat,r.t)});
+ const archive=document.createElement('details');archive.className='panel case-archive';
+ const cards=a.queues.flat();
+ archive.innerHTML='<summary>Historical case archive · '+cards.length+' cards</summary><label for="case-search">Search ward, trade or quarter</label><input id="case-search" placeholder="Try Ullalu or Q4 2024"><div class="case-results"></div>';
+ main.append(archive);
+ const search=archive.querySelector('input');
+ const draw=()=>{const query=search.value.trim().toLowerCase();const matches=[...cards].reverse().filter(r=>[wardById.get(r.ward).name,a.categories[r.cat],qname(r.t),String(r.ward)].join(' ').toLowerCase().includes(query));
+   archive.querySelector('.case-results').innerHTML=matches.map(r=>'<a href="#radar/'+r.t+'/'+r.ward+'/'+r.cat+'"><b>'+esc(wardById.get(r.ward).name)+'</b><span>'+esc(a.categories[r.cat])+' · '+qname(r.t)+'</span></a>').join('')||'<p>No matching historical cases.</p>';};
+ search.oninput=draw;draw();
  const btn=main.querySelector('#export-log');if(btn)btn.onclick=()=>download('ward-wise-review-log.json',JSON.stringify(logs.map(({r,status,note,updated})=>({ward:r.ward,category:a.categories[r.cat],period:qname(r.t),status,note,updated})),null,2),'application/json')
 }
 function methods(){
@@ -297,12 +369,58 @@ function methods(){
  '<section class="panel"><div class="over orange">Credits and reuse</div><h2>Source register</h2><p><a class="lightlink" href="https://github.com/Vonter/bbmp-trade-license">BBMP applications compiled by Vivek Matthew</a> · ODbL 1.0. Adapted, deduplicated and aggregated by Team Codyssey.</p><p><a class="lightlink" href="https://github.com/datameet/Municipal_Spatial_Data/tree/master/Bangalore">DataMeet 2012 ward boundaries</a> · CC BY-SA 2.5 India. Lake outlines by ATREE-CSEI via OpenCity, CC BY.</p></section>'+
  '<section class="panel"><div class="over orange">Interpretation</div><h2>What the data measures</h2><p>Each count is an application filed with BBMP. A renewal application is evidence of a filing. The public extract does not establish its due date, whether it was timely, whether the shop closed, or how much revenue the business earned.</p><p class="small">Application density depends on the ward’s size, registration practices and mix of businesses. The map uses seven colour bands. Annual views share cutoffs calculated from all five years for the selected filters. The combined view uses five-year ward totals. Relief height encodes the same bands.</p></section></div>';
 }
-function route(){stopTimeline();if(dialog.open)dialog.close();const v=view();document.querySelectorAll('[data-nav]').forEach(n=>{if(n.dataset.nav===v)n.setAttribute('aria-current','page');else n.removeAttribute('aria-current')});if(v==='radar')radar();else if(v==='methods')methods();else atlas();if(v!=='atlas')observeSections(main);window.scrollTo(0,0)}
+async function route(){
+ const token=++visit, previousView=main.dataset.view;
+ const focused=document.activeElement?.id;
+ stopTimeline();if(dialog.open)dialog.close();const v=view(),path=parts();
+ main.dataset.view=v;
+ document.querySelectorAll('[data-nav]').forEach(n=>{
+   if(n.dataset.nav===v)n.setAttribute('aria-current','page');else n.removeAttribute('aria-current');
+ });
+ const validNum=(value,min,max)=>/^\d+$/.test(value||'')&&Number(value)>=min&&Number(value)<=max;
+ if(v==='radar'){
+   if(validNum(path[1],0,19))state.t=Number(path[1]);
+   radar();
+   const r=a.queues[state.t].find(row=>String(row.ward)===path[2]&&String(row.cat)===path[3]);
+   if(r)evidence(r);
+ }else if(v==='methods')methods();
+ else if(v==='lab'){
+   if(previousView!==v)main.innerHTML='<p class="loading" role="status">Loading the evidence lab…</p>';
+   try{
+     const index=await auditData();if(token!==visit)return;
+     renderLab({main,atlas:a,wards,byId:wardById,index,escape:esc,download,notify:message,openCase:openReview});
+   }catch{
+     if(token!==visit)return;
+     main.innerHTML='<section class="panel"><h1>Evidence unavailable</h1><p>The research file could not be loaded. The map and quarterly queue are still available.</p><button class="btn" id="retry-lab">Try again</button></section>';
+     main.querySelector('#retry-lab').onclick=route;
+   }
+ }else if(v==='brief'){
+   lastFrame=briefing(main,a,validNum(path[1],1,10)?Number(path[1]):lastFrame);
+   document.querySelector('[data-nav=brief]').href='#brief/'+lastFrame;
+ }else{
+   if(validNum(path[1],1,198)){
+     state.ward=Number(path[1]);state.year=validNum(path[2],2020,2024)?path[2]:'all';
+     state.cat=validNum(path[3],0,9)?path[3]:'all';state.type=['new','renewal'].includes(path[4])?path[4]:'all';state.relief=path[5]==='relief';
+   }
+   atlas();
+ }
+ if(v!=='atlas')observeSections(main);
+ if(v===previousView && focused && ['lab-ward','lab-trade','lab-quarter','lab-peer','quarter','deck-page'].includes(focused))document.getElementById(focused)?.focus({preventScroll:true});
+ if(v!==previousView||v==='brief')window.scrollTo(0,0);
+}
+document.addEventListener('keydown',e=>{
+ if(view()!=='brief'||e.altKey||e.metaKey||e.ctrlKey||e.target.closest('input,select,textarea,button,summary,a')||dialog.open)return;
+ if(e.key==='ArrowRight'&&lastFrame<10){e.preventDefault();location.hash='brief/'+(lastFrame+1);}
+ if(e.key==='ArrowLeft'&&lastFrame>1){e.preventDefault();location.hash='brief/'+(lastFrame-1);}
+});
+document.addEventListener('fullscreenchange',()=>{const b=document.querySelector('#full-deck');if(b)b.textContent=document.fullscreenElement?'Exit full screen':'Full screen';});
+document.querySelector('.skip').onclick=e=>{e.preventDefault();main.focus();};
+dialog.addEventListener('close',()=>{if(!dialog.open&&view()==='radar'&&parts().length===4)syncRadar();});
 async function start(){
  try{
   [a,geo,lakes,coverage]=await Promise.all(['atlas','wards','lakes','coverage'].map(async n=>{const r=await fetch('data/'+n+'.json');if(!r.ok)throw Error(n);return r.json()}));
   wards=geo.wards;wardById=new Map(wards.map(w=>[w.id,w]));rows=a.rows;
-  route();window.addEventListener('hashchange',route);window.addEventListener('storage',e=>{if(e.key===logKey&&view()==='radar'&&!dialog.open)radar()})
+  route();window.addEventListener('hashchange',route);window.addEventListener('storage',e=>{if((e.key===null||e.key===legacyKey||e.key.startsWith(prefix))&&view()==='radar'&&!dialog.open)radar()})
  }catch{main.innerHTML='<p class="loading" role="alert">The atlas data could not be loaded. <button class="btn" id="retry">Try again</button></p>';main.querySelector('#retry').onclick=()=>location.reload()}
 }
 start();
