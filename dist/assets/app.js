@@ -43,7 +43,15 @@ function auditData(){
 }
 function openReview(w,c,t){
   const dest='radar/'+t+'/'+w+'/'+c;
-  if(location.hash==='#'+dest)route();else location.hash=dest;
+  if(view()==='radar' && state.t===t){
+    const record=a.queues[t].find(row=>row.ward===w && row.cat===c);
+    if(record){
+      history.replaceState(null,'','#'+dest);
+      evidence(record);
+      return;
+    }
+  }
+  location.hash=dest;
 }
 function syncAtlas(){
   if(view()!=='atlas') return;

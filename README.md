@@ -17,6 +17,15 @@ Team Codyssey built Ward Wise for the BAICONF Datathon Stage 2. The atlas follow
 
 ## Run locally
 
+To obtain the finalist edition before or after the main release:
+
+```sh
+git clone --branch final-round-workbench https://github.com/ParvBhawsar/ward-wise-bengaluru.git
+cd ward-wise-bengaluru
+```
+
+Alternatively, download the [finalist source ZIP](https://github.com/ParvBhawsar/ward-wise-bengaluru/archive/refs/heads/final-round-workbench.zip), extract it and open a terminal in the folder containing `dist/`. The same server command below works for both paths.
+
 The committed `dist/` is a deployable offline-capable static asset directory. The app makes no third-party runtime requests and needs no API keys. Start a local HTTP server from the repository root with Python 3.
 
 ```sh
