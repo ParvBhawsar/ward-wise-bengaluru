@@ -58,7 +58,8 @@ The extraction script checks the compressed input SHA-256 before processing. Use
 | `dist/data/atlas.json` | Browser representation, review queue and validation output |
 | `dist/data/audit.json` | Eligible model scores and final selection decisions for the evidence lab |
 | `dist/data/wards.json`, `lakes.json` | Projected boundary paths and lake outlines |
-| `api/evidence.py`, `server/evidence.sqlite3` | Public evidence service and versioned, read-only SQLite database |
+| `api/evidence.py`, `server/evidence.sqlite3` | Public evidence service and read-only SQLite copy for outages |
+| `supabase/migrations/` | Schema and read-only access policy for the managed PostgreSQL database |
 | `scripts/` | Reproducible data acquisition, ward crosswalk, geography and analysis |
 | `tests/`, `.github/workflows/` | Integrity checks and deterministic rebuild verification |
 | `docs/figures/` | Seven report-ready screenshots of the running application |
@@ -72,9 +73,9 @@ The model measures unusual **application mix** conditional on ward volume. The c
 
 Evidence Lab requests `GET /api/evidence?ward=85&category=1&peer=150`. The ward number is 1–198, the trade index is 0–7 and the comparison ward is optional. The response includes model parameters and 20 quarterly records per requested ward. Each record includes local and comparison-city counts, the model decision and, when eligible, the expected count and band. Historical periods use the 198-ward geography in the source release.
 
-The Vercel Python function queries the bundled SQLite database in read-only mode. Only aggregate counts and model outputs are served. Successful responses can be cached at the edge for a day. Invalid queries return HTTP 400. If the API is unavailable, the lab uses the matching published snapshot shipped with that release. Review notes stay in the user's browser and are excluded from API requests and shared evidence links.
+The Vercel Python function queries a dedicated Supabase PostgreSQL database in Mumbai. Each request selects one or two indexed ward series from the same research snapshot. Public clients have read-only access. The matching SQLite database ships with the function for automatic failover. The response headers `X-Evidence-Source` and `X-Evidence-Snapshot` identify the active data source and release. Only aggregate counts and model outputs are served. Successful responses can be cached at the edge for a day. Invalid queries return HTTP 400. If the function itself is unreachable but the published data files are accessible, the lab can reconstruct the same evidence in the browser. Review notes stay in the user's browser and are excluded from API requests and shared evidence links.
 
-Vercel serves the assets from `dist/` and packages the database with the function using `vercel.json`. Run `npm run build` and `npm test` before deploying an updated research snapshot. After deployment, open the [public API example](https://ward-wise-bengaluru.vercel.app/api/evidence?ward=85&category=1) and check the final quarter for ward 85 (36 observed, 92.4 expected).
+Vercel serves the assets from `dist/` and packages the database with the function using `vercel.json`. Run `npm run build` and `npm test` before deploying an updated research snapshot. For a new data release, update the snapshot ID to the SHA-256 prefix checked by the tests, apply the managed schema, and run `python3 scripts/build_cloud_seed.py /tmp/ward-wise-seed`. Apply the generated SQL files with database-owner privileges and verify 1,584 series and 31,680 quarters before switching traffic. The read API takes `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` from the Vercel environment. Running locally without these variables uses the embedded copy. After deployment, open the [public API example](https://ward-wise-bengaluru.vercel.app/api/evidence?ward=85&category=1) and check the final quarter for ward 85 (36 observed, 92.4 expected).
 
 ## Attribution
 
