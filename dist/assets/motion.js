@@ -6,6 +6,9 @@ const easeOut = 'cubic-bezier(.19,1,.3,1)';
 let entrances;
 let storyObserver;
 let progressFrame = 0;
+let storyPlate;
+let storyList;
+let lastScrollState;
 
 export function playMotion(element, frames, options) {
   if (!element || reduced.matches || !element.animate) return;
@@ -17,6 +20,12 @@ function enter(element) {
     {opacity:.12, transform:'translateY(26px)'},
     {opacity:1, transform:'translateY(0)'}
   ], {duration:630, easing:easeOut});
+  // Draw the historical trajectory only as its chart enters the viewport.
+  const trace = element.querySelector('.obs-line');
+  if (trace) {
+    trace.setAttribute('pathLength','1');
+    playMotion(trace,[{strokeDasharray:'1 1',strokeDashoffset:'1'},{strokeDasharray:'1 1',strokeDashoffset:'0'}], {duration:930,easing:easeOut});
+  }
   const line = element.querySelector('.trend-stroke');
   if (line) playMotion(line, [
     {strokeDasharray:'1 1', strokeDashoffset:'1'},
@@ -31,16 +40,18 @@ function enter(element) {
 export function observeSections(root) {
   entrances?.disconnect();
   storyObserver?.disconnect();
-  if (!('IntersectionObserver' in window)) return;
+  storyPlate = root.querySelector('.story-plate');
+  storyList = root.querySelector('.story-list');
+  scheduleProgress();
+  if (!('IntersectionObserver' in window) || reduced.matches) return;
   entrances = new IntersectionObserver(entries => {
     for (const entry of entries) {
       if (!entry.isIntersecting) continue;
       entrances.unobserve(entry.target);
       enter(entry.target);
     }
-  }, {threshold:.1});
-  root.querySelectorAll('.below > .panel, .rad-layout > .panel, .method-grid > .panel, .story-head, .story-row').forEach(el=>entrances.observe(el));
-  scheduleProgress();
+  }, {threshold:0.04});
+  root.querySelectorAll('.below > .panel, .rad-layout > .panel, .method-grid > .panel, .lab-grid > section, .history-panel, .case-archive, .scenario, .case-link, .story-head, .story-row').forEach(el=>entrances.observe(el));
 }
 
 export function observeStory(steps, select) {
@@ -60,6 +71,18 @@ function scheduleProgress() {
   if (progressFrame) return;
   progressFrame = requestAnimationFrame(()=>{
     progressFrame = 0;
+    const scrolled=scrollY>20;
+    if (scrolled!==lastScrollState) {
+      document.documentElement.classList.toggle('page-scrolled',scrolled);
+      lastScrollState=scrolled;
+    }
+    if (storyList && storyPlate && !reduced.matches) {
+      const box=storyList.getBoundingClientRect();
+      if(box.bottom>0 && box.top<innerHeight) {
+        const progress=Math.max(0,Math.min(1,(innerHeight*.55-box.top)/Math.max(1,box.height)));
+        storyPlate.style.setProperty('--story-progress',progress.toFixed(3));
+      }
+    }
     const max=document.documentElement.scrollHeight-innerHeight;
     document.querySelector('.read-progress').style.transform='scaleX('+(max>0?Math.min(1,Math.max(0,scrollY/max)):0)+')';
   });

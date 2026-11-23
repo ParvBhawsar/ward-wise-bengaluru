@@ -1,6 +1,6 @@
 import {researchIndex} from './research.js';
 import {renderLab} from './lab.js';
-import {briefing} from './briefing.js';
+import {loadEvidence} from './evidence-client.js';
 import {statuses, legacyKey, prefix, readEntry, revise, parseTransfer} from './review-store.js';
 import {observeSections, playMotion} from './motion.js';
 import {mountSpotlight} from './spotlight.js';
@@ -30,10 +30,9 @@ const state={year:'all',cat:'all',type:'all',ward:151,t:19,zoom:1,relief:false};
 let activeChart;
 let timelineTimer = null;
 const parts = () => location.hash.slice(1).split('/');
-const view = () => ['radar','methods','lab','brief'].includes(parts()[0]) ? parts()[0] : 'atlas';
+const view = () => ['radar','methods','lab'].includes(parts()[0]) ? parts()[0] : 'atlas';
 let auditRequest;
 let visit = 0;
-let lastFrame = 1;
 function auditData(){
   if (!auditRequest) auditRequest=fetch('data/audit.json').then(r=>{
     if(!r.ok)throw Error('audit');
@@ -395,33 +394,25 @@ async function route(){
  else if(v==='lab'){
    if(previousView!==v)main.innerHTML='<p class="loading" role="status">Loading the evidence lab…</p>';
    try{
-     const index=await auditData();if(token!==visit)return;
+     const index=await loadEvidence(location.hash,wardById,auditData);if(token!==visit)return;
      renderLab({main,atlas:a,wards,byId:wardById,index,escape:esc,download,notify:message,openCase:openReview});
    }catch{
      if(token!==visit)return;
      main.innerHTML='<section class="panel"><h1>Evidence unavailable</h1><p>The research file could not be loaded. The map and quarterly queue are still available.</p><button class="btn" id="retry-lab">Try again</button></section>';
      main.querySelector('#retry-lab').onclick=route;
    }
- }else if(v==='brief'){
-   lastFrame=briefing(main,a,validNum(path[1],1,10)?Number(path[1]):lastFrame);
-   document.querySelector('[data-nav=brief]').href='#brief/'+lastFrame;
  }else{
-   if(validNum(path[1],1,198)){
+   if(path[0]==='atlas'&&validNum(path[1],1,198)){
      state.ward=Number(path[1]);state.year=validNum(path[2],2020,2024)?path[2]:'all';
      state.cat=validNum(path[3],0,9)?path[3]:'all';state.type=['new','renewal'].includes(path[4])?path[4]:'all';state.relief=path[5]==='relief';
    }
    atlas();
+   if(path[0] && path[0]!=='atlas')syncAtlas();
  }
  if(v!=='atlas')observeSections(main);
- if(v===previousView && focused && ['lab-ward','lab-trade','lab-quarter','lab-peer','quarter','deck-page'].includes(focused))document.getElementById(focused)?.focus({preventScroll:true});
- if(v!==previousView||v==='brief')window.scrollTo(0,0);
+ if(v===previousView && focused && ['lab-ward','lab-trade','lab-quarter','lab-peer','quarter'].includes(focused))document.getElementById(focused)?.focus({preventScroll:true});
+ if(v!==previousView)window.scrollTo(0,0);
 }
-document.addEventListener('keydown',e=>{
- if(view()!=='brief'||e.altKey||e.metaKey||e.ctrlKey||e.target.closest('input,select,textarea,button,summary,a')||dialog.open)return;
- if(e.key==='ArrowRight'&&lastFrame<10){e.preventDefault();location.hash='brief/'+(lastFrame+1);}
- if(e.key==='ArrowLeft'&&lastFrame>1){e.preventDefault();location.hash='brief/'+(lastFrame-1);}
-});
-document.addEventListener('fullscreenchange',()=>{const b=document.querySelector('#full-deck');if(b)b.textContent=document.fullscreenElement?'Exit full screen':'Full screen';});
 document.querySelector('.skip').onclick=e=>{e.preventDefault();main.focus();};
 dialog.addEventListener('close',()=>{if(!dialog.open&&view()==='radar'&&parts().length===4)syncRadar();});
 async function start(){

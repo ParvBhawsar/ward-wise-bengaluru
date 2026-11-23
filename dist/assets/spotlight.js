@@ -28,7 +28,7 @@ export function mountSpotlight(root, {wardById,rows,queues,showWard,showEvidence
   feature.innerHTML='<div class="story-head"><div class="eyebrow">Ward spotlight</div><h2>Three wards, <i>up close.</i></h2></div>'+
     '<div class="story-grid"><div class="story-plate" aria-hidden="true"><div class="plate-top"><span>WARD OUTLINE</span><span class="plate-index"></span></div>'+
     '<svg class="ward-portrait" aria-hidden="true" preserveAspectRatio="xMidYMid meet"><path fill-rule="evenodd"/></svg>'+
-    '<div class="plate-foot"><span class="plate-number"></span><span class="plate-mode"></span></div></div><div class="story-list">'+
+    '<div class="story-meter"><i></i></div><div class="plate-foot"><span class="plate-number"></span><span class="plate-mode"></span></div></div><div class="story-list">'+
     items.map((item,i)=>'<article class="story-row" data-step="'+i+'"><div class="story-meta"><span class="story-step">'+String(i+1).padStart(2,'0')+'</span>'+item.field+' · '+item.period+'</div><h3>'+escape(item.ward.name)+'</h3><p>'+item.narrative+'</p><button class="story-jump" data-open-step="'+i+'">'+(item.id===85?'Open evidence card':'Locate on map')+' <span aria-hidden="true">↗</span></button></article>').join('')+'</div></div>';
   const plate=feature.querySelector('.story-plate');
   const portrait=plate.querySelector('svg');
@@ -45,6 +45,8 @@ export function mountSpotlight(root, {wardById,rows,queues,showWard,showEvidence
     plate.querySelector('.plate-number').textContent=format(item.value);
     plate.querySelector('.plate-mode').textContent=item.mode+' · '+item.period;
     shape.setAttribute('d',item.ward.path);
+    shape.setAttribute('pathLength','1');
+    playMotion(shape,[{strokeDasharray:'1 1',strokeDashoffset:'1'},{strokeDasharray:'1 1',strokeDashoffset:'0'}], {duration:760,easing:'ease-out'});
     const box=shape.getBBox();
     const pad=Math.max(box.width,box.height)*.12;
     portrait.setAttribute('viewBox',[box.x-pad,box.y-pad,box.width+2*pad,box.height+2*pad].join(' '));
